@@ -1,4 +1,4 @@
-# Skills
+# Skill Labs
 
 Coleção de cinco Agent Skills experimentais, portáveis no núcleo `SKILL.md`, para criação de prompts, tradução e melhoria orientada por evidências de outras skills.
 
@@ -27,7 +27,7 @@ Converte uma falha observada em um caso mínimo de regressão para revisão huma
 ## Estrutura
 
 ```text
-skills/
+skill-labs/
 ├── README.md
 ├── text-to-prompt/
 │   ├── SKILL.md
