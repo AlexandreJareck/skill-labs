@@ -67,18 +67,31 @@ Nenhuma das cinco skills exige API, serviço hospedado, MCP ou acesso de rede pa
 
 ## Instalação no Codex
 
-No PowerShell, a partir da raiz deste repositório, copie as skills desejadas para o diretório pessoal do Codex:
+O Codex lê as skills pessoais de `~/.agents/skills/`. A pasta antiga `~/.codex/skills/` não é mais lida para skills de usuário.
+
+No PowerShell, a partir da raiz deste repositório, crie uma junção para cada skill. Assim, as skills instaladas acompanham este repositório: um `git pull` ou uma edição local já valem, sem reinstalar.
 
 ```powershell
 $names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval'
-foreach ($name in $names) { Copy-Item -Recurse ".\$name" "$env:USERPROFILE\.codex\skills\$name" }
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
+foreach ($name in $names) { New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\$name" -Target (Resolve-Path ".\$name") | Out-Null }
 ```
+
+Se mover ou renomear este repositório, apague as junções e crie-as de novo. Para uma cópia independente do repositório, troque a junção por `Copy-Item -Recurse`.
 
 Inicie um novo chat para que as skills sejam descobertas. A seleção automática permanece habilitada, e cada skill também pode ser chamada explicitamente com `$nome-da-skill`.
 
 ## Instalação no Claude Code
 
-Copie as pastas desejadas para `.claude/skills/` no projeto ou para `~/.claude/skills/` para uso global. O `SKILL.md`, os scripts e as referências são compartilháveis. `agents/openai.yaml` contém somente metadados da interface OpenAI e não precisa de equivalente no Claude Code.
+O Claude Code lê as skills globais de `~/.claude/skills/` e as de projeto de `.claude/skills/`. Para uso global, no PowerShell e a partir da raiz deste repositório:
+
+```powershell
+$names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval'
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
+foreach ($name in $names) { New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\$name" -Target (Resolve-Path ".\$name") | Out-Null }
+```
+
+Inicie uma nova sessão para que as skills sejam carregadas. O `SKILL.md`, os scripts e as referências são compartilháveis. `agents/openai.yaml` contém somente metadados da interface OpenAI e não precisa de equivalente no Claude Code.
 
 ## Uso
 
