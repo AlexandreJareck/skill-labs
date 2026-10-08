@@ -1,0 +1,5 @@
+interface:
+  display_name: "Failure to Eval"
+  short_description: "Turn observed failures into regression cases"
+  default_prompt: "Use $failure-to-eval to convert this observed skill failure into a review-ready regression case."
+

@@ -1,16 +1,28 @@
 # Skills
 
-Coleção de skills experimentais para ampliar fluxos de trabalho no Codex e em agentes compatíveis com o formato `SKILL.md`.
+Coleção de cinco Agent Skills experimentais, portáveis no núcleo `SKILL.md`, para criação de prompts, tradução e melhoria orientada por evidências de outras skills.
 
 ## Skills disponíveis
 
 ### `text-to-prompt`
 
-Transforma anotações, requisitos informais ou conteúdo de arquivos `.txt` em prompts claros, completos e reutilizáveis. A skill preserva a intenção original, explicita lacunas com placeholders e adapta a estrutura ao tipo de tarefa.
+Transforma anotações, requisitos informais ou conteúdo de arquivos `.txt` em prompts claros, completos e reutilizáveis. Preserva a intenção original, explicita lacunas com placeholders e adapta a estrutura ao tipo de tarefa.
 
 ### `translate-to-english`
 
 Traduz textos em português para inglês natural com fidelidade semântica. Preserva intenção, tom, intensidade, restrições, estrutura e elementos técnicos sem melhorar, resumir ou reinterpretar silenciosamente o conteúdo.
+
+### `skill-quality-auditor`
+
+Audita uma Agent Skill sem executar seu conteúdo e produz um relatório Markdown baseado em evidências. Examina estrutura, descoberta, workflow, divulgação progressiva, segurança e portabilidade com códigos estáveis e severidades `ERROR`, `WARNING`, `NOTE` e `PASS`.
+
+### `skill-eval-harness`
+
+Planeja, executa e compara avaliações locais de uma Agent Skill. Usa casos JSONL versionáveis, separa Outcome, Process, Style e Efficiency e distingue falhas da skill de falhas de infraestrutura. O MVP não exige API ou plataforma hospedada.
+
+### `failure-to-eval`
+
+Converte uma falha observada em um caso mínimo de regressão para revisão humana. Sanitiza dados sensíveis, separa sintomas de hipóteses e gera diretamente o formato `skill-eval-case/v1` aceito pelo harness.
 
 ## Estrutura
 
@@ -19,37 +31,58 @@ skills/
 ├── README.md
 ├── text-to-prompt/
 │   ├── SKILL.md
-│   ├── agents/
-│   │   └── openai.yaml
-│   └── references/
-│       └── prompt-practices.md
-└── translate-to-english/
+│   ├── agents/openai.yaml
+│   └── references/prompt-practices.md
+├── translate-to-english/
+│   ├── SKILL.md
+│   └── agents/openai.yaml
+├── skill-quality-auditor/
+│   ├── SKILL.md
+│   ├── agents/openai.yaml
+│   ├── references/rules.md
+│   └── scripts/audit_skill.py
+├── skill-eval-harness/
+│   ├── SKILL.md
+│   ├── agents/openai.yaml
+│   ├── references/
+│   │   ├── case-schema.md
+│   │   ├── sample-cases.jsonl
+│   │   └── sample-observations.jsonl
+│   └── scripts/eval_harness.py
+└── failure-to-eval/
     ├── SKILL.md
-    └── agents/
-        └── openai.yaml
+    ├── agents/openai.yaml
+    └── references/
+        ├── case-schema.md
+        └── sample-regression-case.jsonl
 ```
+
+## Pré-requisitos
+
+- Um agente compatível com o padrão aberto Agent Skills, como Codex ou Claude Code.
+- Python 3.10 ou superior para os verificadores determinísticos opcionais.
+- `PyYAML` apenas para executar o validador oficial incluído em `$skill-creator`; as skills e seus scripts próprios usam somente a biblioteca padrão.
+
+Nenhuma das cinco skills exige API, serviço hospedado, MCP ou acesso de rede para seu workflow principal.
 
 ## Instalação no Codex
 
-Copie a pasta da skill para o diretório pessoal de skills:
+No PowerShell, a partir da raiz deste repositório, copie as skills desejadas para o diretório pessoal do Codex:
 
 ```powershell
-Copy-Item -Recurse .\text-to-prompt "$env:USERPROFILE\.codex\skills\text-to-prompt"
+$names = 'text-to-prompt', 'translate-to-english', 'skill-quality-auditor', 'skill-eval-harness', 'failure-to-eval'
+foreach ($name in $names) { Copy-Item -Recurse ".\$name" "$env:USERPROFILE\.codex\skills\$name" }
 ```
 
-Inicie um novo chat para que a skill seja descoberta. A seleção automática permanece habilitada, e ela também pode ser chamada explicitamente.
+Inicie um novo chat para que as skills sejam descobertas. A seleção automática permanece habilitada, e cada skill também pode ser chamada explicitamente com `$nome-da-skill`.
 
-Para instalar a segunda skill:
+## Instalação no Claude Code
 
-```powershell
-Copy-Item -Recurse .\translate-to-english "$env:USERPROFILE\.codex\skills\translate-to-english"
-```
-
-No Claude Code, copie as pastas para `.claude/skills/` no projeto ou para `~/.claude/skills/` para uso global. O arquivo `SKILL.md` e os recursos associados são portáveis; `agents/openai.yaml` contém apenas metadados específicos da interface OpenAI.
+Copie as pastas desejadas para `.claude/skills/` no projeto ou para `~/.claude/skills/` para uso global. O `SKILL.md`, os scripts e as referências são compartilháveis. `agents/openai.yaml` contém somente metadados da interface OpenAI e não precisa de equivalente no Claude Code.
 
 ## Uso
 
-Invoque a skill e forneça o texto diretamente:
+Crie um prompt a partir de anotações:
 
 ```text
 Use $text-to-prompt para transformar estas anotações em um prompt:
@@ -57,15 +90,7 @@ Use $text-to-prompt para transformar estas anotações em um prompt:
 quero analisar os logs, achar erros mais frequentes, gerar tabela e sugerir prioridades
 ```
 
-Ou indique um arquivo:
-
-```text
-Use $text-to-prompt para converter o arquivo requisitos.txt em um prompt pronto para uso.
-```
-
-Por padrão, a resposta contém somente o prompt final e não executa a tarefa descrita. Você pode pedir uma explicação das decisões ou solicitar uma variante específica, como um prompt para pesquisa, código, análise ou criação de conteúdo.
-
-Depois de revisar e aprovar o prompt em português, traduza a versão final sem alterar seu conteúdo:
+Traduza o prompt aprovado sem alterar seu conteúdo:
 
 ```text
 Use $translate-to-english para traduzir este prompt para inglês com fidelidade total:
@@ -73,30 +98,70 @@ Use $translate-to-english para traduzir este prompt para inglês com fidelidade 
 [cole aqui o prompt aprovado]
 ```
 
-No Claude Code, use a invocação equivalente:
+Audite uma skill sem modificá-la:
 
 ```text
-/translate-to-english [cole aqui o texto em português]
+Use $skill-quality-auditor para auditar a skill em .\text-to-prompt e produzir um relatório com evidências.
 ```
 
-A skill traduz todas as instruções e partes textuais, inclusive títulos e o conteúdo de placeholders. Código, comandos, URLs, caminhos, identificadores e expressões de template permanecem intactos. Se uma ambiguidade em português puder mudar materialmente o significado, a skill pergunta antes de traduzir.
+Planeje ou execute uma avaliação local:
+
+```text
+Use $skill-eval-harness para avaliar esta skill com casos explícitos, implícitos, negativos, ambíguos e de segurança. Não altere a skill avaliada.
+```
+
+Converta um incidente em regressão:
+
+```text
+Use $failure-to-eval para transformar esta falha em um caso de regressão: o agente declarou sucesso, mas não executou a validação exigida.
+```
+
+No Claude Code, use as invocações equivalentes `/text-to-prompt`, `/translate-to-english`, `/skill-quality-auditor`, `/skill-eval-harness` e `/failure-to-eval`.
+
+## Integração do ciclo de qualidade
+
+O `skill-quality-auditor` encontra problemas estáticos e semânticos e registra evidências, sem depender das outras skills. O `skill-eval-harness` mede comportamento por casos e observações locais. Quando um uso real falha, `failure-to-eval` reduz e sanitiza o incidente, gerando um caso `skill-eval-case/v1` que pode ser adicionado ao dataset do harness após revisão humana.
+
+O schema aparece integralmente em `skill-eval-harness` e `failure-to-eval` para que cada skill continue autocontida. As duas cópias devem permanecer idênticas; compare seus hashes ao alterar o contrato.
 
 ## Validação
 
-Execute o validador distribuído com `skill-creator`:
+Execute o validador oficial distribuído com `$skill-creator` para cada skill nova:
 
 ```powershell
-python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\text-to-prompt
+python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\skill-quality-auditor
+python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\skill-eval-harness
+python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\failure-to-eval
 ```
 
-Além da validação estrutural, teste a skill com textos curtos, requisitos ambíguos e prompts já existentes para confirmar que ela preserva intenção, restrições e idioma.
-
-Valide também a segunda skill:
+Teste o auditor mecanicamente contra uma skill existente, sem modificá-la:
 
 ```powershell
-python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\translate-to-english
+python .\skill-quality-auditor\scripts\audit_skill.py .\text-to-prompt --pretty
 ```
 
-## Referências
+Valide o dataset de smoke test do harness e o caso sintético gerado no formato de `failure-to-eval`:
 
-As decisões da primeira skill foram baseadas na documentação oficial da [OpenAI sobre prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering), na orientação de [geração de prompts](https://developers.openai.com/api/docs/guides/prompt-generation), nas recomendações da [OpenAI para skills e AGENTS.md](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra) e nas [boas práticas de prompting da Anthropic](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices).
+```powershell
+python .\skill-eval-harness\scripts\eval_harness.py validate .\skill-eval-harness\references\sample-cases.jsonl
+python .\skill-eval-harness\scripts\eval_harness.py validate .\failure-to-eval\references\sample-regression-case.jsonl
+python .\skill-eval-harness\scripts\eval_harness.py grade .\skill-eval-harness\references\sample-cases.jsonl .\skill-eval-harness\references\sample-observations.jsonl
+```
+
+Compare as duas cópias do contrato:
+
+```powershell
+Get-FileHash .\skill-eval-harness\references\case-schema.md -Algorithm SHA256
+Get-FileHash .\failure-to-eval\references\case-schema.md -Algorithm SHA256
+```
+
+Os scripts confirmam estrutura e condições objetivas; a qualidade semântica continua exigindo revisão baseada em evidências. Para as duas skills anteriores, permanecem válidos os testes de preservação de intenção, restrições, estrutura e idioma já descritos em seus próprios `SKILL.md`.
+
+## Referências oficiais
+
+- [OpenAI — Skills](https://developers.openai.com/api/docs/guides/tools-skills)
+- [OpenAI — Testing Agent Skills Systematically with Evals](https://developers.openai.com/blog/eval-skills)
+- [OpenAI — Evaluate agent workflows](https://developers.openai.com/api/docs/guides/agent-evals)
+- [OpenAI — Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
+- [OpenAI — Prompt generation](https://developers.openai.com/api/docs/guides/prompt-generation)
+- [Anthropic — Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)
