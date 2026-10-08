@@ -12,11 +12,11 @@ Transforma anotações, requisitos informais ou conteúdo de arquivos `.txt` em 
 
 Traduz textos em português para inglês natural com fidelidade semântica. Preserva intenção, tom, intensidade, restrições, estrutura e elementos técnicos sem melhorar, resumir ou reinterpretar silenciosamente o conteúdo.
 
-### `skill-quality-auditor`
+### `quality-auditor`
 
 Audita uma Agent Skill sem executar seu conteúdo e produz um relatório Markdown baseado em evidências. Examina estrutura, descoberta, workflow, divulgação progressiva, segurança e portabilidade com códigos estáveis e severidades `ERROR`, `WARNING`, `NOTE` e `PASS`.
 
-### `skill-eval-harness`
+### `eval-harness`
 
 Planeja, executa e compara avaliações locais de uma Agent Skill. Usa casos JSONL versionáveis, separa Outcome, Process, Style e Efficiency e distingue falhas da skill de falhas de infraestrutura. O MVP não exige API ou plataforma hospedada.
 
@@ -36,12 +36,12 @@ skills/
 ├── translate-to-english/
 │   ├── SKILL.md
 │   └── agents/openai.yaml
-├── skill-quality-auditor/
+├── quality-auditor/
 │   ├── SKILL.md
 │   ├── agents/openai.yaml
 │   ├── references/rules.md
 │   └── scripts/audit_skill.py
-├── skill-eval-harness/
+├── eval-harness/
 │   ├── SKILL.md
 │   ├── agents/openai.yaml
 │   ├── references/
@@ -70,7 +70,7 @@ Nenhuma das cinco skills exige API, serviço hospedado, MCP ou acesso de rede pa
 No PowerShell, a partir da raiz deste repositório, copie as skills desejadas para o diretório pessoal do Codex:
 
 ```powershell
-$names = 'text-to-prompt', 'translate-to-english', 'skill-quality-auditor', 'skill-eval-harness', 'failure-to-eval'
+$names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval'
 foreach ($name in $names) { Copy-Item -Recurse ".\$name" "$env:USERPROFILE\.codex\skills\$name" }
 ```
 
@@ -101,13 +101,13 @@ Use $translate-to-english para traduzir este prompt para inglês com fidelidade 
 Audite uma skill sem modificá-la:
 
 ```text
-Use $skill-quality-auditor para auditar a skill em .\text-to-prompt e produzir um relatório com evidências.
+Use $quality-auditor para auditar a skill em .\text-to-prompt e produzir um relatório com evidências.
 ```
 
 Planeje ou execute uma avaliação local:
 
 ```text
-Use $skill-eval-harness para avaliar esta skill com casos explícitos, implícitos, negativos, ambíguos e de segurança. Não altere a skill avaliada.
+Use $eval-harness para avaliar esta skill com casos explícitos, implícitos, negativos, ambíguos e de segurança. Não altere a skill avaliada.
 ```
 
 Converta um incidente em regressão:
@@ -116,42 +116,42 @@ Converta um incidente em regressão:
 Use $failure-to-eval para transformar esta falha em um caso de regressão: o agente declarou sucesso, mas não executou a validação exigida.
 ```
 
-No Claude Code, use as invocações equivalentes `/text-to-prompt`, `/translate-to-english`, `/skill-quality-auditor`, `/skill-eval-harness` e `/failure-to-eval`.
+No Claude Code, use as invocações equivalentes `/text-to-prompt`, `/translate-to-english`, `/quality-auditor`, `/eval-harness` e `/failure-to-eval`.
 
 ## Integração do ciclo de qualidade
 
-O `skill-quality-auditor` encontra problemas estáticos e semânticos e registra evidências, sem depender das outras skills. O `skill-eval-harness` mede comportamento por casos e observações locais. Quando um uso real falha, `failure-to-eval` reduz e sanitiza o incidente, gerando um caso `skill-eval-case/v1` que pode ser adicionado ao dataset do harness após revisão humana.
+O `quality-auditor` encontra problemas estáticos e semânticos e registra evidências, sem depender das outras skills. O `eval-harness` mede comportamento por casos e observações locais. Quando um uso real falha, `failure-to-eval` reduz e sanitiza o incidente, gerando um caso `skill-eval-case/v1` que pode ser adicionado ao dataset do harness após revisão humana.
 
-O schema aparece integralmente em `skill-eval-harness` e `failure-to-eval` para que cada skill continue autocontida. As duas cópias devem permanecer idênticas; compare seus hashes ao alterar o contrato.
+O schema aparece integralmente em `eval-harness` e `failure-to-eval` para que cada skill continue autocontida. As duas cópias devem permanecer idênticas; compare seus hashes ao alterar o contrato.
 
 ## Validação
 
 Execute o validador oficial distribuído com `$skill-creator` para cada skill nova:
 
 ```powershell
-python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\skill-quality-auditor
-python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\skill-eval-harness
+python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\quality-auditor
+python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\eval-harness
 python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\failure-to-eval
 ```
 
 Teste o auditor mecanicamente contra uma skill existente, sem modificá-la:
 
 ```powershell
-python .\skill-quality-auditor\scripts\audit_skill.py .\text-to-prompt --pretty
+python .\quality-auditor\scripts\audit_skill.py .\text-to-prompt --pretty
 ```
 
 Valide o dataset de smoke test do harness e o caso sintético gerado no formato de `failure-to-eval`:
 
 ```powershell
-python .\skill-eval-harness\scripts\eval_harness.py validate .\skill-eval-harness\references\sample-cases.jsonl
-python .\skill-eval-harness\scripts\eval_harness.py validate .\failure-to-eval\references\sample-regression-case.jsonl
-python .\skill-eval-harness\scripts\eval_harness.py grade .\skill-eval-harness\references\sample-cases.jsonl .\skill-eval-harness\references\sample-observations.jsonl
+python .\eval-harness\scripts\eval_harness.py validate .\eval-harness\references\sample-cases.jsonl
+python .\eval-harness\scripts\eval_harness.py validate .\failure-to-eval\references\sample-regression-case.jsonl
+python .\eval-harness\scripts\eval_harness.py grade .\eval-harness\references\sample-cases.jsonl .\eval-harness\references\sample-observations.jsonl
 ```
 
 Compare as duas cópias do contrato:
 
 ```powershell
-Get-FileHash .\skill-eval-harness\references\case-schema.md -Algorithm SHA256
+Get-FileHash .\eval-harness\references\case-schema.md -Algorithm SHA256
 Get-FileHash .\failure-to-eval\references\case-schema.md -Algorithm SHA256
 ```
 

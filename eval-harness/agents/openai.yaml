@@ -1,0 +1,5 @@
+interface:
+  display_name: "Eval Harness"
+  short_description: "Run evidence-based local Agent Skill evals"
+  default_prompt: "Use $eval-harness to design and run a local evaluation for this Agent Skill."
+

@@ -31,7 +31,7 @@ If the failure cannot be distinguished from a runner, credential, timeout, or co
 
 The primary output is one valid `skill-eval-case/v1` JSON object ready for human review and later insertion as one JSONL line. It must preserve provenance, contain no sensitive value, distinguish infrastructure from skill behavior, and include the minimum evidence needed to prevent the observed regression.
 
-Success does not mean the case was executed. State execution status explicitly when asked. If the local `skill-eval-harness` validator is independently available, the user may validate the candidate with its documented command; this skill must remain usable without that sibling skill.
+Success does not mean the case was executed. State execution status explicitly when asked. If the local `eval-harness` validator is independently available, the user may validate the candidate with its documented command; this skill must remain usable without that sibling skill.
 
 ## Stop and refusal conditions
 

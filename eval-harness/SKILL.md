@@ -1,9 +1,9 @@
 ---
-name: skill-eval-harness
+name: eval-harness
 description: Plan, run, and compare local evaluations of an Agent Skill using versioned cases, deterministic checks, and semantic rubrics. Use for activation tests, workflow regressions, safety boundaries, or baseline comparisons; do not silently modify the evaluated skill.
 ---
 
-# Skill Eval Harness
+# Eval Harness
 
 Evaluate one Agent Skill with a local, vendor-neutral dataset. Separate observed behavior from expectations and skill failures from infrastructure failures.
 

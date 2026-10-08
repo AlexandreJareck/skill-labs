@@ -1,0 +1,5 @@
+interface:
+  display_name: "Quality Auditor"
+  short_description: "Audit Agent Skills with evidence and stable rules"
+  default_prompt: "Use $quality-auditor to audit this Agent Skill and produce an evidence-based report."
+
