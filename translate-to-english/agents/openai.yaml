@@ -1,0 +1,4 @@
+interface:
+  display_name: "Translate to English"
+  short_description: "Traduza para inglês com fidelidade semântica"
+  default_prompt: "Use $translate-to-english para traduzir este conteúdo para inglês sem alterar sua intenção."
