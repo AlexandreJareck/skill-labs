@@ -1,31 +1,31 @@
-# Práticas de construção de prompts
+# Prompt construction practices
 
-Use esta referência ao revisar ou evoluir a skill. Ela registra as decisões que não precisam ocupar o contexto em toda invocação.
+Use this reference when reviewing or evolving the skill. It records decisions that do not need to occupy context on every invocation.
 
-## Princípios adotados
+## Adopted principles
 
-- Declare com clareza a tarefa e o resultado esperado.
-- Inclua apenas o contexto relevante; prompts maiores não são automaticamente melhores.
-- Preserve requisitos, exemplos, variáveis e restrições fornecidos pelo usuário.
-- Separe instruções de contexto e conteúdo por meio de títulos ou delimitadores consistentes.
-- Defina um formato de saída verificável quando houver necessidade concreta.
-- Use poucos exemplos de alta qualidade quando a tarefa depender de um padrão difícil de descrever.
-- Trate prompting como um processo iterativo: comece com a forma mais simples que possa funcionar e refine com observações ou avaliações reais.
-- Em skills, mantenha a descrição curta e discriminante; mova detalhes condicionais para referências, evitando contexto global excessivo.
+- Clearly state the task and expected outcome.
+- Include only relevant context; longer prompts are not automatically better.
+- Preserve requirements, examples, variables, and constraints provided by the user.
+- Separate instructions from context and content by using consistent headings or delimiters.
+- Define a verifiable output format when there is a concrete need.
+- Use a small number of high-quality examples when the task depends on a pattern that is difficult to describe.
+- Treat prompting as an iterative process: start with the simplest form that could work and refine it based on real observations or evaluations.
+- In skills, keep the description short and discriminating; move conditional details to references to avoid excessive global context.
 
-## Decisões específicas desta skill
+## Decisions specific to this skill
 
-- A saída padrão é somente o prompt, porque o artefato solicitado deve poder ser copiado e usado diretamente.
-- Lacunas não bloqueantes viram placeholders visíveis em vez de fatos inventados.
-- Não há template universal obrigatório. A estrutura se adapta ao tipo e à complexidade da tarefa.
-- O papel/persona é opcional e só deve aparecer quando influenciar a qualidade da resposta.
-- A skill converte e melhora o prompt, mas não executa a tarefa contida nele.
+- The default output contains only the prompt, because the requested artifact should be ready to copy and use directly.
+- Non-blocking gaps become visible placeholders rather than invented facts.
+- There is no mandatory universal template. The structure adapts to the task's type and complexity.
+- A role or persona is optional and should appear only when it influences response quality.
+- The skill converts and improves the prompt but does not execute the task contained within it.
 
-## Fontes oficiais consultadas
+## Official sources consulted
 
 - [OpenAI — Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
 - [OpenAI — Prompt generation](https://developers.openai.com/api/docs/guides/prompt-generation)
 - [OpenAI — Rethinking skills and prompts](https://developers.openai.com/blog/rethinking-skills-and-prompts-for-gpt-6-astra)
 - [Anthropic — Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)
 
-Revalide estas fontes antes de mudanças importantes, pois recomendações específicas de modelos podem evoluir.
+Revalidate these sources before making significant changes, as model-specific recommendations may evolve.

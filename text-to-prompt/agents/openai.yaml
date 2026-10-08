@@ -1,4 +1,4 @@
 interface:
   display_name: "Text to Prompt"
-  short_description: "Transforme textos soltos em prompts claros"
-  default_prompt: "Use $text-to-prompt para transformar estas anotações em um prompt de alta qualidade."
+  short_description: "Turn loose text into clear, polished prompts"
+  default_prompt: "Use $text-to-prompt to turn these notes into a high-quality prompt."
