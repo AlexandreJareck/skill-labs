@@ -1,0 +1,4 @@
+interface:
+  display_name: "Software Request Workflow"
+  short_description: "Guides requests with traceability"
+  default_prompt: "Use $software-request-workflow to structure and guide this software request through validation."

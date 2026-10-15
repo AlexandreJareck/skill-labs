@@ -1,6 +1,6 @@
 # Skill Labs
 
-Coleção de cinco Agent Skills experimentais, portáveis no núcleo `SKILL.md`, para criação de prompts, tradução e melhoria orientada por evidências de outras skills.
+Coleção de seis Agent Skills experimentais, portáveis no núcleo `SKILL.md`, para criação de prompts, tradução, workflows de software e melhoria orientada por evidências de outras skills.
 
 ## Skills disponíveis
 
@@ -23,6 +23,10 @@ Planeja, executa e compara avaliações locais de uma Agent Skill. Usa casos JSO
 ### `failure-to-eval`
 
 Converte uma falha observada em um caso mínimo de regressão para revisão humana. Sanitiza dados sensíveis, separa sintomas de hipóteses e gera diretamente o formato `skill-eval-case/v1` aceito pelo harness.
+
+### `software-request-workflow`
+
+Conduz features, melhorias, bugs, correções e otimizações por quatro macrofases estáveis. Mantém o núcleo de entendimento, planejamento, implementação, revisão, correção, testes, homologação, commit, PR e code review humano em qualquer complexidade; capacidades de segurança, resiliência, background, banco e operação entram conforme o risco.
 
 ## Estrutura
 
@@ -49,12 +53,20 @@ skill-labs/
 │   │   ├── sample-cases.jsonl
 │   │   └── sample-observations.jsonl
 │   └── scripts/eval_harness.py
-└── failure-to-eval/
+├── failure-to-eval/
     ├── SKILL.md
     ├── agents/openai.yaml
     └── references/
         ├── case-schema.md
         └── sample-regression-case.jsonl
+└── software-request-workflow/
+    ├── SKILL.md
+    ├── agents/openai.yaml
+    ├── assets/templates/
+    ├── references/
+    └── scripts/
+        ├── workflow.ps1
+        └── test-workflow.ps1
 ```
 
 ## Pré-requisitos
@@ -63,7 +75,7 @@ skill-labs/
 - Python 3.10 ou superior para os verificadores determinísticos opcionais.
 - `PyYAML` apenas para executar o validador oficial incluído em `$skill-creator`; as skills e seus scripts próprios usam somente a biblioteca padrão.
 
-Nenhuma das cinco skills exige API, serviço hospedado, MCP ou acesso de rede para seu workflow principal.
+Nenhuma das seis skills exige API, serviço hospedado, MCP ou acesso de rede para seu workflow principal. O script de referência de `software-request-workflow` usa apenas recursos nativos do PowerShell.
 
 ## Instalação no Codex
 
@@ -72,7 +84,7 @@ O Codex lê as skills pessoais de `~/.agents/skills/`. A pasta antiga `~/.codex/
 No PowerShell, a partir da raiz deste repositório, crie uma junção para cada skill. Assim, as skills instaladas acompanham este repositório: um `git pull` ou uma edição local já valem, sem reinstalar.
 
 ```powershell
-$names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval'
+$names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval', 'software-request-workflow'
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.agents\skills" | Out-Null
 foreach ($name in $names) { New-Item -ItemType Junction -Path "$env:USERPROFILE\.agents\skills\$name" -Target (Resolve-Path ".\$name") | Out-Null }
 ```
@@ -86,7 +98,7 @@ Inicie um novo chat para que as skills sejam descobertas. A seleção automátic
 O Claude Code lê as skills globais de `~/.claude/skills/` e as de projeto de `.claude/skills/`. Para uso global, no PowerShell e a partir da raiz deste repositório:
 
 ```powershell
-$names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval'
+$names = 'text-to-prompt', 'translate-to-english', 'quality-auditor', 'eval-harness', 'failure-to-eval', 'software-request-workflow'
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude\skills" | Out-Null
 foreach ($name in $names) { New-Item -ItemType Junction -Path "$env:USERPROFILE\.claude\skills\$name" -Target (Resolve-Path ".\$name") | Out-Null }
 ```
@@ -129,7 +141,15 @@ Converta um incidente em regressão:
 Use $failure-to-eval para transformar esta falha em um caso de regressão: o agente declarou sucesso, mas não executou a validação exigida.
 ```
 
-No Claude Code, use as invocações equivalentes `/text-to-prompt`, `/translate-to-english`, `/quality-auditor`, `/eval-harness` e `/failure-to-eval`.
+Conduza uma demanda de software completa:
+
+```text
+Use $software-request-workflow para estruturar esta regressão de latência, investigar a causa com as evidências disponíveis e produzir tarefas verificáveis. Não implemente até os gates anteriores passarem.
+```
+
+No Claude Code, use as invocações equivalentes `/text-to-prompt`, `/translate-to-english`, `/quality-auditor`, `/eval-harness`, `/failure-to-eval` e `/software-request-workflow`.
+
+O workflow cria seu registro no projeto que contém a demanda, em `.workflow/project-context.md` e `.workflow/requests/<request-id>/`. Copie somente os templates aplicáveis de `software-request-workflow/assets/templates/`. Use `investigation.md` para bugs/correções e `performance-analysis.md` para performance.
 
 ## Integração do ciclo de qualidade
 
@@ -145,7 +165,22 @@ Execute o validador oficial distribuído com `$skill-creator` para cada skill no
 python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\quality-auditor
 python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\eval-harness
 python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\failure-to-eval
+python "$env:USERPROFILE\.codex\skills\.system\skill-creator\scripts\quick_validate.py" .\software-request-workflow
 ```
+
+Valide a implementação determinística e simule os onze cenários mínimos:
+
+```powershell
+pwsh -NoProfile -File .\software-request-workflow\scripts\test-workflow.ps1
+pwsh -NoProfile -File .\software-request-workflow\scripts\workflow.ps1 route bug
+pwsh -NoProfile -File .\software-request-workflow\scripts\workflow.ps1 profile critical -Background -Database -SecuritySensitive
+pwsh -NoProfile -File .\software-request-workflow\scripts\workflow.ps1 transition in_review approved
+pwsh -NoProfile -File .\software-request-workflow\scripts\workflow.ps1 failure product 1
+pwsh -NoProfile -File .\software-request-workflow\scripts\workflow.ps1 validate <diretorio-da-solicitacao>
+pwsh -NoProfile -File .\software-request-workflow\scripts\workflow.ps1 acceptance <artefato-de-entrega.md>
+```
+
+O último comando exige que todas as referências do diretório da solicitação apontem para artefatos presentes. Os templates com frontmatter formam artefatos validáveis; `pull-request.md` é um corpo de PR reutilizável, não um artefato do registro. Ao remover um artefato opcional, remova ou ajuste as relações correspondentes.
 
 Teste o auditor mecanicamente contra uma skill existente, sem modificá-la:
 
@@ -173,8 +208,17 @@ Os scripts confirmam estrutura e condições objetivas; a qualidade semântica c
 ## Referências oficiais
 
 - [OpenAI — Skills](https://developers.openai.com/api/docs/guides/tools-skills)
+- [OpenAI — Skills em repositórios](https://developers.openai.com/blog/skills-agents-sdk)
 - [OpenAI — Testing Agent Skills Systematically with Evals](https://developers.openai.com/blog/eval-skills)
 - [OpenAI — Evaluate agent workflows](https://developers.openai.com/api/docs/guides/agent-evals)
 - [OpenAI — Prompt engineering](https://developers.openai.com/api/docs/guides/prompt-engineering)
 - [OpenAI — Prompt generation](https://developers.openai.com/api/docs/guides/prompt-generation)
 - [Anthropic — Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices)
+- [Anthropic — Skills no Claude Code](https://code.claude.com/docs/en/skills)
+- [Anthropic — Building effective agents](https://www.anthropic.com/engineering/building-effective-agents)
+- [QuantumBlack — Agentic workflows for software development](https://medium.com/quantumblack/agentic-workflows-for-software-development-dc8e64f4a79d)
+- [JetBrains — A Complete Guide to Agentic Workflows](https://www.jetbrains.com/pages/ai-agents/architecture/agentic-workflows/)
+- [NIST SP 800-218 — Secure Software Development Framework](https://csrc.nist.gov/pubs/sp/800/218/final)
+- [OWASP — Application Security Verification Standard](https://owasp.org/projects/asvs)
+- [OWASP — Threat Modeling Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
+- [PCI Security Standards Council — PCI DSS](https://www.pcisecuritystandards.org/standards/pci-dss/)
